@@ -1,3 +1,5 @@
+import html
+
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -19,3 +21,25 @@ class HTMLNode:
                 f"Value: {self.value[:60] + '...' if self.value and len(self.value) > 60 else self.value}\n"
                 f"Children: {len(self.children) if self.children else 'N/a'}\n"
                 f"Props: {self.props}")
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag=None, value=None, props=None):
+        if value is None:
+            raise ValueError("LeafNode must have a value.")
+        if props is None:
+            props = {}
+        super().__init__(tag, value, [], props)
+
+    def to_html(self):
+        if self.value is None:
+            raise ValueError("LeafNode must have a value.")
+        if self.tag is None:
+            return self.value
+        attributes = " ".join(f'{key}="{html.escape(value)}"' for key, value in self.props.items())
+        if attributes:
+            tag_open = f"<{self.tag} {attributes}>"
+        else:
+            tag_open = f"<{self.tag}>"
+        
+        tag_close = f"</{self.tag}>"
+        return f"{tag_open}{self.value}{tag_close}"

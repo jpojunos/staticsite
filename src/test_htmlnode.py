@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import *
 
 class TestHTMLNode(unittest.TestCase):
     def test_constructor_defaults(self):
@@ -36,6 +36,55 @@ class TestHTMLNode(unittest.TestCase):
                          "Children: 2\n"
                          "Props: {'class': 'main'}")
         self.assertEqual(repr(node), expected_repr)
+
+class TestLeafNode(unittest.TestCase):
+
+    def test_initialization_without_value_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            LeafNode()  # No value provided
+
+    def test_initialization_with_value(self):
+        leaf = LeafNode(tag="p", value="This is a paragraph.")
+        self.assertEqual(leaf.value, "This is a paragraph.")
+        self.assertEqual(leaf.tag, "p")
+    
+    def test_to_html_without_tag(self):
+        leaf = LeafNode(value="Just text")
+        self.assertEqual(leaf.to_html(), "Just text")
+
+    def test_to_html_with_tag_no_props(self):
+        leaf = LeafNode(tag="p", value="This is a paragraph.")
+        self.assertEqual(leaf.to_html(), "<p>This is a paragraph.</p>")
+
+    def test_to_html_with_tag_and_props(self):
+        leaf = LeafNode(tag="a", value="Click me!", props={"href": "https://www.google.com"})
+        self.assertEqual(leaf.to_html(), '<a href="https://www.google.com">Click me!</a>')
+
+class TestLeafNodeAdditional(unittest.TestCase):
+
+    def test_long_value(self):
+        long_value = "a" * 1000  # Very long string
+        leaf = LeafNode(tag="p", value=long_value)
+        self.assertEqual(leaf.to_html(), f"<p>{long_value}</p>")
+
+    def test_special_characters_in_value(self):
+        special_value = "Text with <special> characters & more"
+        leaf = LeafNode(tag="p", value=special_value)
+        self.assertEqual(leaf.to_html(), f"<p>{special_value}</p>")
+
+    def test_empty_string_value(self):
+        leaf = LeafNode(tag="p", value="")
+        self.assertEqual(leaf.to_html(), "<p></p>")
+
+    def test_special_characters_in_props(self):
+        props = {"title": 'Title with "double" and \'single\' quotes'}
+        leaf = LeafNode(tag="div", value="Content", props=props)
+        expected_html = '<div title="Title with &quot;double&quot; and &#x27;single&#x27; quotes">Content</div>'
+        self.assertEqual(leaf.to_html(), expected_html)
+
+    def test_tag_with_special_character(self):
+        leaf = LeafNode(tag="my-tag", value="special tag")
+        self.assertEqual(leaf.to_html(), "<my-tag>special tag</my-tag>")
 
 if __name__ == "__main__":
     unittest.main()
