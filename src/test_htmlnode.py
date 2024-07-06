@@ -85,6 +85,31 @@ class TestLeafNodeAdditional(unittest.TestCase):
     def test_tag_with_special_character(self):
         leaf = LeafNode(tag="my-tag", value="special tag")
         self.assertEqual(leaf.to_html(), "<my-tag>special tag</my-tag>")
+    
+class TestParentNode(unittest.TestCase):
+    def setUp(self):
+        self.leaf1 = LeafNode("b", "Bold text")
+        self.leaf2 = LeafNode(None, "Normal text")
+        self.leaf3 = LeafNode("i", "italic text")
+        self.leaf4 = LeafNode(None, "Normal text")
+
+    def test_single_level(self):
+        node = ParentNode("p", [self.leaf1, self.leaf2, self.leaf3, self.leaf4])
+        self.assertEqual(node.to_html(), "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>")
+    
+    def test_nested(self):
+        nested_child = ParentNode("div", [self.leaf1, self.leaf2])
+        node = ParentNode("section", [nested_child, self.leaf3])
+        self.assertEqual(node.to_html(), "<section><div><b>Bold text</b>Normal text</div><i>italic text</i></section>")
+    
+    def test_no_tag(self):
+        with self.assertRaises(ValueError):
+            node = ParentNode(None, [self.leaf1, self.leaf2])
+            node.to_html()
+
+    def test_no_children(self):
+        with self.assertRaises(ValueError):
+            ParentNode("div")
 
 if __name__ == "__main__":
     unittest.main()

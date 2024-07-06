@@ -43,3 +43,22 @@ class LeafNode(HTMLNode):
         
         tag_close = f"</{self.tag}>"
         return f"{tag_open}{self.value}{tag_close}"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag=None, children=None, props=None):
+        if children == None:
+            raise ValueError("No children provided")
+        super().__init__(tag, None, children, props)
+    
+    def to_html(self):
+        if self.tag == None:
+            raise ValueError("No Tag provided")
+        open_tag = f"<{self.tag}>"
+        close_tag = f"</{self.tag}>"
+        collector = ""
+        for child in self.children:
+            collector += child.to_html()
+        return f"{open_tag}{self.props_to_html()}{collector}{close_tag}"
+    
+    def __repr__(self):
+        return f"ParentNode({self.tag}, children: {self.children}, {self.props})"
